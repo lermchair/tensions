@@ -1,0 +1,11 @@
+{
+  "name": "tensions",
+  "workspaces": [
+    "packages/*"
+  ],
+  "private": true,
+  "scripts": {},
+  "devDependencies": {},
+  "engines": {},
+  "dependencies": {}
+}

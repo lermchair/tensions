@@ -1,0 +1,6 @@
+name = "admin"
+kv_namespaces = [{binding = "<BINDING>", id = "<ID>"}]
+compatibility_flags = [ "nodejs_compat_v2" ]
+
+[vars]
+SIGNER_KEY = "<SIGNER_KEY>"
