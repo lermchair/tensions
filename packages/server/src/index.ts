@@ -5,11 +5,14 @@ import { SemaphoreSignaturePCDPackage } from "@pcd/semaphore-signature-pcd";
 import cors from "cors";
 import { PODMintRequest, TensionPOD, TensionPODRequest } from "./utils";
 import { Redis } from "@upstash/redis";
+import bodyParser from "body-parser";
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.json());
 
 const SIGNER_KEY = process.env.SIGNER_KEY;
@@ -89,26 +92,29 @@ app.put("/api/pod/:id", async (req, res) => {
 
 app.post("/api/pod", async (req, res) => {
   try {
-    const { semaphoreSignaturePCD, templateID } = req.body as PODMintRequest;
-    if (!semaphoreSignaturePCD)
-      throw new Error("Missing Semaphore Signature PCD in request");
-    if (!templateID) throw new Error("Missing POD Template ID");
+    const { pod } = req.body as PODMintRequest;
+    if (!pod) throw new Error("Missing ID POD in request");
 
-    const templatePODSerialized = await redis.get(templateID);
-    if (!templatePODSerialized)
-      throw new Error(`POD template ${templateID} doesn't exist`);
+    const deserialized = POD.deserialize(pod);
+    console.log(deserialized);
+    const valid = deserialized.verifySignature();
+    if (!valid) {
+      throw new Error("Invalid signature");
+    }
+    const content = deserialized.content.asEntries();
+    console.log(content);
 
-    const templatePOD = JSON.parse(
-      templatePODSerialized as string
-    ) as TensionPOD;
-    const pcd = await SemaphoreSignaturePCDPackage.deserialize(
-      semaphoreSignaturePCD.pcd
+    const templatePOD = await redis.get(content["templateId"].value as string);
+    if (!templatePOD)
+      throw new Error(
+        `POD template ${content["templateId"].value as string} doesn't exist`
+      );
+
+    const owner = content["pubkey"].value as bigint;
+
+    const podEntries = JSON.parse(
+      (templatePOD as TensionPODRequest).podEntries
     );
-    const owner = pcd.claim.identityCommitment;
-    if (!(await SemaphoreSignaturePCDPackage.verify(pcd)))
-      throw new Error("Couldn't verify Semaphore Signature PCD");
-
-    const podEntries = JSON.parse(templatePOD.podEntries);
     podEntries.owner = { type: "cryptographic", value: BigInt(owner) };
 
     const newPOD = POD.sign(podEntries, SIGNER_KEY);
@@ -117,13 +123,16 @@ app.post("/api/pod", async (req, res) => {
     if (existingPOD) throw new Error(`Already minted POD with ID: ${newPODID}`);
 
     const newPODData = {
-      owner,
-      podEntries: JSON.stringify(podEntries),
+      // ...templatePOD,
+      owner: owner.toString(),
+      // podEntries: JSON.stringify(podEntries),
       serializedPOD: newPOD.serialize(),
     };
+    console.log(newPODData);
     await redis.set(newPODID, JSON.stringify(newPODData));
 
     res.status(200).json({ pod: newPOD.serialize() });
+    // res.status(200);
   } catch (e) {
     console.error(e);
     res
@@ -167,11 +176,7 @@ app.post("/api/newpod", async (req, res) => {
     }
 
     const podEntries = JSON.parse(body.podEntries);
-    if (body.owner !== undefined) {
-      podEntries.owner = { type: "cryptographic", value: body.owner };
-    } else {
-      delete podEntries.owner;
-    }
+    delete podEntries.owner;
 
     podEntries.timestamp = { type: "int", value: BigInt(Date.now()) };
     const pod = POD.sign(podEntries, SIGNER_KEY);

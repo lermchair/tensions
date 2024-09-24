@@ -30,8 +30,9 @@ export async function addOrUpdateTension(
         ...data,
         podEntries: JSON.stringify({
           name: { type: "string", value: data.name },
-          base64Image: { type: "string", value: data.base64Image },
+          zupass_image_url: { type: "string", value: data.base64Image },
           source: { type: "string", value: data.source },
+          zupass_title: { type: "string", value: data.name },
         } as TensionPODData),
         podFolder: "Tensions",
       } as TensionPODRequest,

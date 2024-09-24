@@ -1,5 +1,4 @@
 import { GPCPCD } from "@pcd/gpc-pcd";
-import { SerializedPCD } from "@pcd/pcd-types";
 
 export interface TensionPODData {
   name: { type: "string"; value: string };

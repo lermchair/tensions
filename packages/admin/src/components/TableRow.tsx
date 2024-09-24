@@ -40,7 +40,7 @@ export const TableRow: React.FC<{
       <td className="px-6 py-4">
         <span
           className="font-medium text-indigo-500 cursor-pointer"
-          onClick={() => onEdit(tension)}
+          onClick={() => onEdit()}
         >
           Edit
         </span>

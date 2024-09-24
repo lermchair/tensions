@@ -1,7 +1,11 @@
 export interface TensionPODData {
   name: { type: "string"; value: string };
-  base64Image: { type: "string"; value: string };
+  zupass_title: { type: "string"; value: string };
+  zupass_image_url: { type: "string"; value: string };
   source: { type: "string"; value: string };
+  zupass_display: { type: "string"; value: "collectable" };
+  owner: { type: "cryptographic"; value: bigint };
+  timestamp: { type: "int"; value: bigint };
 }
 
 export interface TensionData {

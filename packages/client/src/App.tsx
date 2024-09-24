@@ -3,7 +3,7 @@ import useQueryParams from "./lib/UseQueryParams";
 import { useParcnetClient } from "./lib/UseParcnetClient";
 import axios from "axios";
 import { TensionPOD } from "./utils";
-import { POD, PODEntries, podEntriesFromSimplifiedJSON } from "@pcd/pod";
+import { POD, PODEntries } from "@pcd/pod";
 
 function App() {
   const { z, connected } = useParcnetClient();
@@ -52,34 +52,34 @@ function App() {
           <button
             className="rounded bg-emerald-600 text-white font-bold px-4 py-2 flex items-center justify-center cursor-pointer"
             onClick={async () => {
-              const pubkey = await z.identity.getSemaphoreV3Commitment();
+              const pubkey = await z.identity.getSemaphoreV4Commitment();
               console.log(pubkey);
               const deserializedPOD = POD.deserialize(tension.serializedPOD);
               console.log(deserializedPOD);
-              const v = deserializedPOD.verifySignature();
-              console.log(v);
-              const data = deserializedPOD.content.asEntries();
-              data["zupass_image_url"] = {
-                type: "string",
-                value: tension.base64Image,
-              };
-              data["zupass_display"] = {
-                type: "string",
-                value: "collectable",
-              };
-              data["zupass_title"] = {
-                type: "string",
-                value: tension.name,
-              };
-              data["owner"] = {
-                type: "cryptographic",
-                value: pubkey,
-              };
-              console.log(data);
+              const validSignedPod = deserializedPOD.verifySignature();
+              console.log(validSignedPod);
+              if (!validSignedPod) {
+                console.error("Invalid signature for pod");
+                return;
+              }
+              const idPod = {
+                pubkey: { type: "cryptographic", value: pubkey },
+                templateId: { type: "string", value: queryParams["tension"] },
+              } as PODEntries;
+              const idPodSigned = await z.pod.sign(idPod);
+              const resp = await axios.post(`http://localhost:3000/api/pod`, {
+                pod: idPodSigned.serialize(),
+              });
+              // console.log(resp);
+              // console.log(data);
 
-              const pod = await z.pod.sign(data);
-              console.log(pod);
-              await z.pod.insert(pod);
+              // const pod = await z.pod.sign(data);
+              // console.log(pod);
+              if (resp.data.pod) {
+                console.log("inserting pod...");
+                const deserialized = POD.deserialize(resp.data.pod);
+                await z.pod.insert(deserialized);
+              }
             }}
           >
             Get it
