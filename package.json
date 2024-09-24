@@ -4,8 +4,15 @@
     "packages/*"
   ],
   "private": true,
-  "scripts": {},
-  "devDependencies": {},
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.1.2"
+  },
   "engines": {},
+  "packageManager": "bun@1.1.28",
   "dependencies": {}
 }
