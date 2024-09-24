@@ -12,4 +12,10 @@ export default defineConfig({
       snarkjs: "snarkjs/dist/node/index.js",
     },
   },
+  build: {
+    target: "esnext",
+    rollupOptions: {
+      external: ["@cloudflare/workers-types"],
+    },
+  },
 });

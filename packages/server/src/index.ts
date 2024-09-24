@@ -1,133 +1,199 @@
 import express from "express";
 import dotenv from "dotenv";
-import { kv } from "@vercel/kv";
 import { POD } from "@pcd/pod";
 import { SemaphoreSignaturePCDPackage } from "@pcd/semaphore-signature-pcd";
 import cors from "cors";
 import { PODMintRequest, TensionPOD, TensionPODRequest } from "./utils";
+import { Redis } from "@upstash/redis";
+
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Environment variables
 const SIGNER_KEY = process.env.SIGNER_KEY;
+const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
+const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-// GET endpoint
+if (!SIGNER_KEY || !UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) {
+  console.error("Missing required environment variables");
+  process.exit(1);
+}
+
+const redis = new Redis({
+  url: UPSTASH_REDIS_REST_URL,
+  token: UPSTASH_REDIS_REST_TOKEN,
+});
+
+// Logging middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
 app.get("/api/pod/:id", async (req, res) => {
   try {
-    const id = req.params.id;
-    const pod = await kv.get(id);
+    const pod = await redis.get(req.params.id);
     if (!pod) {
+      console.log(`Pod not found: ${req.params.id}`);
       return res.status(404).json({ message: "Pod not found" });
     }
-    return res.json(pod);
-  } catch (e: Error | unknown) {
-    console.error(e);
-    return res.status(500).json(e);
+    console.log(`Pod retrieved: ${req.params.id}`);
+    res.json(pod);
+  } catch (e) {
+    console.error(`Error retrieving pod ${req.params.id}:`, e);
+    res.status(500).json({ message: "An error occurred" });
   }
 });
 
-// POST endpoint for POD minting
+app.delete("/api/pod/:id", async (req, res) => {
+  try {
+    const deleted = await redis.del(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Pod not found" });
+    res.status(200).json({ message: "Successfully deleted pod" });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "An error occurred" });
+  }
+});
+
+app.put("/api/pod/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const body = req.body as TensionPODRequest;
+    if (!body?.podEntries)
+      return res.status(400).json({ message: "Missing podEntries in request" });
+
+    const existingPod = await redis.get(id);
+    if (!existingPod)
+      return res.status(404).json({ message: "Can't update nonexistent pod" });
+
+    const podEntries = JSON.parse(body.podEntries);
+    podEntries.timestamp = { type: "int", value: BigInt(Date.now()) };
+    const pod = POD.sign(podEntries, SIGNER_KEY);
+
+    const updatedPod = {
+      ...body,
+      serializedPOD: pod.serialize(),
+    } as TensionPOD;
+    await redis.set(id, JSON.stringify(updatedPod));
+    res.status(200).json({ message: "Successful update" });
+  } catch (e) {
+    console.error(e);
+    res
+      .status(e instanceof SyntaxError ? 400 : 500)
+      .json({ message: e instanceof Error ? e.message : "An error occurred" });
+  }
+});
+
 app.post("/api/pod", async (req, res) => {
   try {
-    const body = req.body as PODMintRequest;
-    if (!body?.semaphoreSignaturePCD)
+    const { semaphoreSignaturePCD, templateID } = req.body as PODMintRequest;
+    if (!semaphoreSignaturePCD)
       throw new Error("Missing Semaphore Signature PCD in request");
-    if (!body?.templateID) throw new Error("Missing POD Template ID");
-    const templatePODSerialized = await kv.get(body.templateID);
+    if (!templateID) throw new Error("Missing POD Template ID");
+
+    const templatePODSerialized = await redis.get(templateID);
     if (!templatePODSerialized)
-      throw new Error(`POD template ${body.templateID} doesn't exist`);
+      throw new Error(`POD template ${templateID} doesn't exist`);
 
     const templatePOD = JSON.parse(
       templatePODSerialized as string
     ) as TensionPOD;
-    const pcdSerialized = body.semaphoreSignaturePCD.pcd;
-    const pcd = await SemaphoreSignaturePCDPackage.deserialize(pcdSerialized);
-    console.log("Deserialized pcd:", pcd);
+    const pcd = await SemaphoreSignaturePCDPackage.deserialize(
+      semaphoreSignaturePCD.pcd
+    );
     const owner = pcd.claim.identityCommitment;
-    const valid = await SemaphoreSignaturePCDPackage.verify(pcd);
-    if (!valid) throw new Error("Couldn't verify Semaphore Signature PCD");
+    if (!(await SemaphoreSignaturePCDPackage.verify(pcd)))
+      throw new Error("Couldn't verify Semaphore Signature PCD");
 
     const podEntries = JSON.parse(templatePOD.podEntries);
+    podEntries.owner = { type: "cryptographic", value: BigInt(owner) };
 
-    podEntries["owner"] = {
-      type: "cryptographic",
-      value: BigInt(owner),
-    };
-
-    const newPOD = POD.sign(JSON.parse(podEntries), process.env.SIGNER_KEY!);
-
+    const newPOD = POD.sign(podEntries, SIGNER_KEY);
     const newPODID = newPOD.contentID.toString(16);
-    const alreadyMinted = await kv.get(newPODID);
-    if (alreadyMinted)
-      throw new Error(`Already minted POD with ID: ${newPODID}`);
-    await kv.set(newPODID, owner);
-    const serialized = newPOD.serialize();
-    return res.status(200).json({ pod: serialized });
+    const existingPOD = await redis.get(newPODID);
+    if (existingPOD) throw new Error(`Already minted POD with ID: ${newPODID}`);
+
+    const newPODData = {
+      owner,
+      podEntries: JSON.stringify(podEntries),
+      serializedPOD: newPOD.serialize(),
+    };
+    await redis.set(newPODID, JSON.stringify(newPODData));
+
+    res.status(200).json({ pod: newPOD.serialize() });
   } catch (e) {
-    if (e instanceof SyntaxError) {
-      return res.status(500).json({ message: e.message });
-    }
     console.error(e);
-    res.status(500).json({ message: "An error occurred" });
+    res
+      .status(e instanceof SyntaxError ? 500 : 400)
+      .json({ message: e instanceof Error ? e.message : "An error occurred" });
   }
 });
 
-// GET endpoint for all PODs
 app.get("/api/pods", async (req, res) => {
   try {
-    let pods = [];
-    for await (const key of kv.scanIterator()) {
-      const value = await kv.get(key);
-      pods.push({ key, value });
-    }
-    return res.status(200).json({ pods: JSON.stringify(pods) });
+    let cursor = "0";
+    const pods = [];
+    const batchSize = 10;
+
+    do {
+      const [nextCursor, keys] = await redis.scan(cursor, {
+        count: batchSize,
+        match: "*",
+      });
+      cursor = nextCursor;
+
+      if (keys.length > 0) {
+        const values = await redis.mget(...keys);
+        pods.push(...keys.map((key, index) => ({ key, value: values[index] })));
+      }
+    } while (cursor !== "0");
+
+    res.status(200).json({ pods });
   } catch (e) {
     console.error(e);
     res.status(500).json({ message: "An error occurred" });
   }
 });
 
-// POST endpoint for creating a new POD
 app.post("/api/newpod", async (req, res) => {
   try {
     const body = req.body as TensionPODRequest;
-    if (!body?.podEntries) throw new Error("Missing podEntries in request");
+    if (!body?.podEntries) {
+      console.log("Missing podEntries in request");
+      throw new Error("Missing podEntries in request");
+    }
+
     const podEntries = JSON.parse(body.podEntries);
     if (body.owner !== undefined) {
-      podEntries["owner"] = {
-        type: "cryptographic",
-        value: body.owner,
-      };
+      podEntries.owner = { type: "cryptographic", value: body.owner };
     } else {
-      if (podEntries.owner) delete podEntries.owner;
+      delete podEntries.owner;
     }
 
     podEntries.timestamp = { type: "int", value: BigInt(Date.now()) };
-    const pod = POD.sign(podEntries, process.env.SIGNER_KEY!);
+    const pod = POD.sign(podEntries, SIGNER_KEY);
 
-    if (body.owner === undefined) {
-      const podCID = pod.contentID.toString(16);
-      console.log("POD CID: ", podCID);
-      const serializedPOD = pod.serialize();
-      await kv.set(
-        podCID,
-        JSON.stringify({
-          serializedPOD,
-          ...body,
-        } as TensionPOD)
-      );
-      return res.status(200).json({ message: "Successfully added pod" });
-    }
+    const podCID = pod.contentID.toString(16);
+    const newPODData = {
+      ...body,
+      serializedPOD: pod.serialize(),
+    } as TensionPOD;
+    await redis.set(podCID, JSON.stringify(newPODData));
+
+    console.log(`New pod created with CID: ${podCID}`);
+    res.status(200).json({ message: "Successfully added pod" });
   } catch (e) {
-    console.error(e);
-    return res.status(500).json(e);
+    console.error("Error creating new pod:", e);
+    res.status(500).json({ message: "An error occurred" });
   }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(
+    `[${new Date().toISOString()}] Server is running on port ${PORT}`
+  );
 });

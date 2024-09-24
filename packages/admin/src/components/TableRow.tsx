@@ -5,7 +5,7 @@ import React, { useState } from "react";
 export const TableRow: React.FC<{
   tension: TensionPOD;
   tension_id: string;
-  onEdit: (tensionData: TensionPOD) => void;
+  onEdit: () => void;
   onDelete: () => void;
 }> = ({ tension, tension_id, onEdit, onDelete }) => {
   const [copied, setCopied] = useState<boolean>(false);
@@ -27,7 +27,9 @@ export const TableRow: React.FC<{
         <span
           className="font-medium text-blue-500 cursor-pointer"
           onClick={async () => {
-            await navigator.clipboard.writeText(tension_id);
+            await navigator.clipboard.writeText(
+              `http://localhost:5174?tension=${tension_id}`
+            );
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
           }}

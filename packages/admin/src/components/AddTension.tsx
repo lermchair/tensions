@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { TensionData, TensionPOD } from "@/types";
+import { TensionData } from "@/types";
 
 export const AddTension: React.FC<{
-  initialTension?: TensionPOD;
-  onSubmit: (t: TensionData) => void;
+  initialTension: TensionData | undefined;
+  onSubmit: (data: TensionData) => void;
 }> = ({ initialTension, onSubmit }) => {
   const [tension, setTension] = useState<TensionData>(
     initialTension || {
@@ -34,6 +34,7 @@ export const AddTension: React.FC<{
       return;
     }
     onSubmit(tension);
+    setTension({ name: "", base64Image: "", source: "", imageFileName: "" });
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,7 +105,7 @@ export const AddTension: React.FC<{
 
       <div className="grid w-full max-w-sm items-center gap-1.5">
         <Label
-          className="block text-gray-500 text-md font-normal flex-start flex"
+          className="text-gray-500 text-md font-normal flex-start flex"
           htmlFor="picture"
         >
           Image

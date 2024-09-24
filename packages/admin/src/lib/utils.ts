@@ -1,4 +1,9 @@
-import { TensionData, TensionPODData, TensionPODRequest } from "@/types";
+import {
+  TensionData,
+  TensionPOD,
+  TensionPODData,
+  TensionPODRequest,
+} from "@/types";
 import axios from "axios";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -9,17 +14,17 @@ export function cn(...inputs: ClassValue[]) {
 
 export async function addOrUpdateTension(
   data: TensionData,
-  onSuccess: () => void,
+  onSuccess: (updatedTension: TensionPOD) => void,
   id?: string
 ) {
   try {
     const url = id
-      ? `http://localhost:8788/api/pods/${id}`
-      : `http://localhost:8788/api/pods`;
+      ? `http://localhost:3000/api/pod/${id}`
+      : `http://localhost:3000/api/newpod`;
     const method = id ? "put" : "post";
     console.log("URL:", url);
     console.log("METHOD:", method);
-    await axios[method](
+    const response = await axios[method](
       url,
       {
         ...data,
@@ -36,7 +41,10 @@ export async function addOrUpdateTension(
         },
       }
     );
-    onSuccess();
+
+    // Assuming the server returns the updated or new tension data
+    const updatedTension: TensionPOD = response.data;
+    onSuccess(updatedTension);
   } catch (error) {
     console.error("Error adding/updating tension:", error);
   }
@@ -48,7 +56,7 @@ export async function handleDeleteTension(
 ) {
   if (!id) return;
   try {
-    await axios.delete(`http://localhost:8788/api/pods/${id}`);
+    await axios.delete(`http://localhost:3000/api/pod/${id}`);
     onSuccess();
   } catch (error) {
     console.error("Error deleting tension:", error);

@@ -1,3 +1,4 @@
+import { GPCPCD } from "@pcd/gpc-pcd";
 import { SerializedPCD } from "@pcd/pcd-types";
 
 export interface TensionPODData {
@@ -25,5 +26,6 @@ export interface TensionPOD extends TensionPODRequest {
 
 export interface PODMintRequest {
   templateID: string;
-  semaphoreSignaturePCD: SerializedPCD;
+  // owner: bigint;
+  owner: GPCPCD;
 }

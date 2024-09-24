@@ -27,6 +27,7 @@
     "@pcd/pod-pcd": "^0.1.1",
     "@pcd/semaphore-signature-pcd": "^0.11.6",
     "@pcd/zk-eddsa-event-ticket-pcd": "^0.6.1",
+    "@upstash/redis": "^1.34.0",
     "@vercel/kv": "^2.0.0",
     "cors": "^2.8.5"
   }
