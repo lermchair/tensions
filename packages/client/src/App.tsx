@@ -41,16 +41,16 @@ function App() {
   return !connected ? null : (
     <div className="container flex items-center justify-center mx-auto">
       {isLoading ? (
-        <div className="border-2 w-full h-full flex items-center justify-center">
+        <div className="w-full h-full flex items-center justify-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
         </div>
       ) : tension ? (
-        <div className="w-full h-full">
-          <span>{tension.name}</span>
-          <img className="h-1/3 w-1/3" src={tension.base64Image} />
-          <span>{tension.source}</span>
+        <div className="flex flex-col items-center justify-center">
+          <span className="my-2 text-3xl">{tension.name}</span>
+          <img src={tension.base64Image} />
+          {tension.source && <span>{tension.source}</span>}
           <button
-            className="rounded bg-emerald-600 text-white font-bold px-4 py-2 flex items-center justify-center cursor-pointer"
+            className="mt-2 rounded bg-emerald-600 text-white font-bold px-4 py-2 flex items-center justify-center cursor-pointer"
             onClick={async () => {
               const pubkey = await z.identity.getSemaphoreV4Commitment();
               console.log(pubkey);
@@ -82,7 +82,7 @@ function App() {
               }
             }}
           >
-            Get it
+            Collect Tension
           </button>
         </div>
       ) : (
