@@ -2,6 +2,7 @@ export interface TensionPODData {
   name: { type: "string"; value: string };
   zupass_title: { type: "string"; value: string };
   zupass_image_url: { type: "string"; value: string };
+  zupass_description?: { type: "string"; value: string };
   source: { type: "string"; value: string };
   zupass_display: { type: "string"; value: "collectable" };
   owner: { type: "cryptographic"; value: bigint };
