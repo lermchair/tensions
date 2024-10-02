@@ -27,7 +27,6 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240909.0",
     "@eslint/js": "^9.9.0",
     "@pcd/pcd-types": "^0.11.4",
     "@types/node": "^22.5.5",
@@ -45,6 +44,6 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1",
-    "vite-plugin-cloudflare-functions": "^0.7.0"
+    "vite-plugin-node-polyfills": "^0.22.0"
   }
 }

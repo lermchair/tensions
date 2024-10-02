@@ -8,6 +8,10 @@ import axios from "axios";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+const SERVER_URL = import.meta.env.PROD
+  ? import.meta.env.VITE_SERVER_URL
+  : "http://localhost:3000";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -18,9 +22,7 @@ export async function addOrUpdateTension(
   id?: string
 ): Promise<string | undefined> {
   try {
-    const url = id
-      ? `http://localhost:3000/api/pod/${id}`
-      : `http://localhost:3000/api/newpod`;
+    const url = id ? `${SERVER_URL}/api/pod/${id}` : `${SERVER_URL}/api/newpod`;
     const method = id ? "put" : "post";
     console.log("URL:", url);
     console.log("METHOD:", method);
@@ -69,7 +71,7 @@ export async function handleDeleteTension(
 ) {
   if (!id) return;
   try {
-    await axios.delete(`http://localhost:3000/api/pod/${id}`);
+    await axios.delete(`${SERVER_URL}/api/pod/${id}`);
     onSuccess();
   } catch (error) {
     console.error("Error deleting tension:", error);

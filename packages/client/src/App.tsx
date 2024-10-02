@@ -12,6 +12,10 @@ function App() {
   const [collected, setCollected] = useState(false);
   const [collectingMessage, setCollectingMessage] = useState("");
 
+  const SERVER_URL = import.meta.env.PROD
+    ? import.meta.env.VITE_SERVER_URL
+    : "http://localhost:3000";
+
   const queryParams = useQueryParams();
 
   useEffect(() => {
@@ -29,7 +33,7 @@ function App() {
     }
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/pod/${qp["tension"]}`
+        `${SERVER_URL}/api/pod/${qp["tension"]}`
       );
       console.log(response);
       if (response.data) {
@@ -64,7 +68,7 @@ function App() {
         templateId: { type: "string", value: queryParams["tension"] },
       } as PODEntries;
       const idPodSigned = await z.pod.sign(idPod);
-      const resp = await axios.post(`http://localhost:3000/api/pod`, {
+      const resp = await axios.post(`${SERVER_URL}/api/pod`, {
         pod: idPodSigned.serialize(),
       });
       if (resp.data.pod) {

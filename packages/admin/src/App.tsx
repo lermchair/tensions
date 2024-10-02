@@ -12,6 +12,10 @@ import {
 import { TensionData, TensionPOD } from "./types";
 import { addOrUpdateTension, handleDeleteTension } from "./lib/utils";
 
+const SERVER_URL = import.meta.env.PROD
+  ? import.meta.env.VITE_SERVER_URL
+  : "http://localhost:3000";
+
 function App() {
   const [tensions, setTensions] = useState<Map<string, TensionPOD>>(new Map());
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -22,7 +26,7 @@ function App() {
   const fetchTensions = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get("http://localhost:3000/api/pods");
+      const response = await axios.get(`${SERVER_URL}/api/pods`);
       if (response.data) {
         const pods = response.data.pods;
         const deserialized = new Map<string, TensionPOD>();

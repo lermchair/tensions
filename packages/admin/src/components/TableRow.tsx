@@ -2,6 +2,10 @@ import { truncateFileName } from "@/lib/utils";
 import { TensionPOD } from "@/types";
 import React, { useState } from "react";
 
+const CLIENT_URL = import.meta.env.PROD
+  ? import.meta.env.VITE_CLIENT_URL
+  : "http://localhost:5174";
+
 export const TableRow: React.FC<{
   tension: TensionPOD;
   tension_id: string;
@@ -28,7 +32,7 @@ export const TableRow: React.FC<{
           className="font-medium text-blue-500 cursor-pointer"
           onClick={async () => {
             await navigator.clipboard.writeText(
-              `http://localhost:5174?tension=${tension_id}`
+              `${CLIENT_URL}?tension=${tension_id}`
             );
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
