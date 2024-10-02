@@ -52,10 +52,13 @@ function App() {
 
     setCollectingMessage("Collecting tension...");
     try {
+      setCollectingMessage("Getting Semaphore commitment...");
       const pubkey = await z.identity.getSemaphoreV4Commitment();
       console.log(pubkey);
+      setCollectingMessage("Deserializing pod...");
       const deserializedPOD = POD.deserialize(tension.serializedPOD);
       console.log(deserializedPOD);
+      setCollectingMessage("Verifying signature...");
       const validSignedPod = deserializedPOD.verifySignature();
       console.log(validSignedPod);
       if (!validSignedPod) {
@@ -67,6 +70,7 @@ function App() {
         pubkey: { type: "cryptographic", value: pubkey },
         templateId: { type: "string", value: queryParams["tension"] },
       } as PODEntries;
+      setCollectingMessage("Signing pod...");
       const idPodSigned = await z.pod.sign(idPod);
       const resp = await axios.post(`${SERVER_URL}/api/pod`, {
         pod: idPodSigned.serialize(),
