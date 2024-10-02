@@ -9,10 +9,28 @@ export default defineConfig({
     port: 5173,
   },
   resolve: {
-    mainFields: ["module", "main"],
+    mainFields: ["browser", "module", "main"],
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  plugins: [react(), nodePolyfills()],
+  plugins: [
+    react(),
+    nodePolyfills({
+      include: ["stream", "util"],
+      globals: {
+        Buffer: true,
+        global: true,
+        process: true,
+      },
+    }),
+  ],
+  define: {
+    global: {},
+  },
+  build: {
+    rollupOptions: {
+      external: [],
+    },
+  },
 });
