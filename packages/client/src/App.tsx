@@ -52,39 +52,53 @@ function App() {
 
     setCollectingMessage("Collecting tension...");
     try {
-      setCollectingMessage("Getting Semaphore commitment...");
-      const pubkey = await z.identity.getSemaphoreV3Commitment();
-      console.log(pubkey);
-      setCollectingMessage("Deserializing pod...");
-      const deserializedPOD = POD.deserialize(tension.serializedPOD);
-      console.log(deserializedPOD);
-      setCollectingMessage("Verifying signature...");
-      const validSignedPod = deserializedPOD.verifySignature();
-      console.log(validSignedPod);
-      if (!validSignedPod) {
-        console.error("Invalid signature for pod");
-        setCollectingMessage("Error: Invalid signature for pod");
-        return;
-      }
-      const idPod = {
-        pubkey: { type: "cryptographic", value: pubkey },
-        templateId: { type: "string", value: queryParams["tension"] },
-      } as PODEntries;
-      setCollectingMessage("Signing pod...");
-      const idPodSigned = await z.pod.sign(idPod);
-      const resp = await axios.post(`${SERVER_URL}/api/pod`, {
-        pod: idPodSigned.serialize(),
-      });
-      if (resp.data.pod) {
-        console.log("inserting pod...");
-        const deserialized = POD.deserialize(resp.data.pod);
-        await z.pod.insert(deserialized);
-        setCollected(true);
-        setCollectingMessage("Collected successfully!");
-      }
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Operation timed out")), 5000)
+      );
+
+      const collectPromise = (async () => {
+        setCollectingMessage("Getting Semaphore commitment...");
+        const pubkey = await z.identity.getSemaphoreV4Commitment();
+        console.log(await z.identity.getSemaphoreV4Commitment());
+
+        setCollectingMessage("Deserializing pod...");
+        const deserializedPOD = POD.deserialize(tension.serializedPOD);
+
+        setCollectingMessage("Verifying signature...");
+        const validSignedPod = deserializedPOD.verifySignature();
+        if (!validSignedPod) {
+          throw new Error("Invalid signature for pod");
+        }
+
+        const idPod = {
+          pubkey: { type: "cryptographic", value: pubkey },
+          templateId: { type: "string", value: queryParams["tension"] },
+        } as PODEntries;
+
+        setCollectingMessage("Signing pod...");
+        const idPodSigned = await z.pod.sign(idPod);
+
+        const resp = await axios.post(`${SERVER_URL}/api/pod`, {
+          pod: idPodSigned.serialize(),
+        });
+
+        if (resp.data.pod) {
+          const deserialized = POD.deserialize(resp.data.pod);
+          await z.pod.insert(deserialized);
+          setCollected(true);
+          setCollectingMessage("Collected successfully!");
+        } else {
+          throw new Error("Failed to collect tension");
+        }
+      })();
+      await Promise.race([collectPromise, timeoutPromise]);
     } catch (error) {
       console.error("Error collecting tension:", error);
-      setCollectingMessage("Error collecting tension. Please try again.");
+      if (error instanceof Error) {
+        setCollectingMessage(`Error: ${error.message}. Please try again.`);
+      } else {
+        setCollectingMessage("Error collecting tension. Please try again.");
+      }
     }
   };
 
