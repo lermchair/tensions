@@ -5,7 +5,7 @@ import { TensionData } from "@/types";
 
 export const AddTension: React.FC<{
   initialTension: TensionData | undefined;
-  onSubmit: (data: TensionData) => void;
+  onSubmit: (data: TensionData) => Promise<string | undefined>;
 }> = ({ initialTension, onSubmit }) => {
   const [tension, setTension] = useState<TensionData>(
     initialTension || {
@@ -16,6 +16,7 @@ export const AddTension: React.FC<{
     }
   );
   const [error, setError] = useState<string | undefined>(undefined);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const setTensionField = useCallback(
     (field: keyof TensionData, value: string) => {
@@ -23,18 +24,37 @@ export const AddTension: React.FC<{
         ...prevTension,
         [field]: value,
       }));
+      setError(undefined); // Clear error when user updates a field
     },
     []
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const isSubmitDisabled =
+    !tension.name.trim() || !tension.base64Image.trim() || isSubmitting;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!tension.name) {
-      setError("Tension name is required");
+    if (isSubmitDisabled) {
+      setError("Tension name and image are required");
       return;
     }
-    onSubmit(tension);
-    setTension({ name: "", base64Image: "", source: "", imageFileName: "" });
+    setIsSubmitting(true);
+    try {
+      const result = await onSubmit(tension);
+      if (typeof result === "string") {
+        setError(result);
+      } else {
+        setTension({
+          name: "",
+          base64Image: "",
+          source: "",
+          imageFileName: "",
+        });
+        setError(undefined);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,10 +152,17 @@ export const AddTension: React.FC<{
 
       <div className="w-full flex justify-end">
         <button
-          className={`shadow bg-slate-800 hover:bg-slate-600 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded`}
+          className={`shadow bg-slate-800 hover:bg-slate-600 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded ${
+            isSubmitDisabled ? "opacity-50 cursor-not-allowed" : ""
+          }`}
           type="submit"
+          disabled={isSubmitDisabled}
         >
-          {initialTension ? "Save changes" : "Add tension"}
+          {isSubmitting
+            ? "Submitting..."
+            : initialTension
+            ? "Save changes"
+            : "Add tension"}
         </button>
       </div>
     </form>

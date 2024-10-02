@@ -16,7 +16,7 @@ export async function addOrUpdateTension(
   data: TensionData,
   onSuccess: (updatedTension: TensionPOD) => void,
   id?: string
-) {
+): Promise<string | undefined> {
   try {
     const url = id
       ? `http://localhost:3000/api/pod/${id}`
@@ -46,8 +46,16 @@ export async function addOrUpdateTension(
     // Assuming the server returns the updated or new tension data
     const updatedTension: TensionPOD = response.data;
     onSuccess(updatedTension);
-  } catch (error) {
+    return undefined; // No error, operation successful
+  } catch (error: unknown) {
     console.error("Error adding/updating tension:", error);
+    if (axios.isAxiosError(error)) {
+      return error.response?.data?.message || error.message;
+    }
+    if (error instanceof Error) {
+      return error.message;
+    }
+    return "An unexpected error occurred";
   }
 }
 

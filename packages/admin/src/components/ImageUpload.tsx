@@ -50,9 +50,10 @@ export const ImageUpload: React.FC<{
   };
 
   useEffect(() => {
-    if (!initialTension || initialTension.base64Image.length == 0) return;
-    setPreviewUrl(initialTension.base64Image as string);
-    setFileName(initialTension.imageFileName);
+    if (initialTension && initialTension.base64Image) {
+      setPreviewUrl(initialTension.base64Image);
+      setFileName(initialTension.imageFileName);
+    }
   }, [initialTension]);
 
   return (
@@ -63,7 +64,7 @@ export const ImageUpload: React.FC<{
           <div className="flex items-center justify-between bg-slate-100 px-4 py-2 rounded text-slate-600 w-full">
             {fileName && <span>{fileName}</span>}
             <div
-              className=" text-red-400 p-1 rounded hover:bg-red-100 hover:text-red-500 cursor-pointer"
+              className="text-red-400 p-1 rounded hover:bg-red-100 hover:text-red-500 cursor-pointer"
               onClick={() => {
                 onDelete();
                 setFileName(undefined);
@@ -117,7 +118,9 @@ export const ImageUpload: React.FC<{
               PNG, JPG, SVG
             </p>
             {fileName && (
-              <p className="text-sm text-gray-500">File selected: {fileName}</p>
+              <p className="text-sm text-gray-500 mt-2">
+                File selected: {fileName}
+              </p>
             )}
           </div>
           <input

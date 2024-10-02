@@ -44,9 +44,13 @@ app.get("/api/pod/:id", async (req, res) => {
     }
     console.log(`Pod retrieved: ${req.params.id}`);
     res.json(pod);
-  } catch (e) {
+  } catch (e: unknown) {
     console.error(`Error retrieving pod ${req.params.id}:`, e);
-    res.status(500).json({ message: "An error occurred" });
+    if (e instanceof Error) {
+      res.status(500).json({ message: `An error occurred: ${e.message}` });
+    } else {
+      res.status(500).json({ message: "An unexpected error occurred" });
+    }
   }
 });
 
@@ -55,9 +59,13 @@ app.delete("/api/pod/:id", async (req, res) => {
     const deleted = await redis.del(req.params.id);
     if (!deleted) return res.status(404).json({ message: "Pod not found" });
     res.status(200).json({ message: "Successfully deleted pod" });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ message: "An error occurred" });
+  } catch (e: unknown) {
+    console.error(`Error deleting pod ${req.params.id}:`, e);
+    if (e instanceof Error) {
+      res.status(500).json({ message: `An error occurred: ${e.message}` });
+    } else {
+      res.status(500).json({ message: "An unexpected error occurred" });
+    }
   }
 });
 
@@ -82,18 +90,24 @@ app.put("/api/pod/:id", async (req, res) => {
     } as TensionPOD;
     await redis.set(id, JSON.stringify(updatedPod));
     res.status(200).json({ message: "Successful update" });
-  } catch (e) {
-    console.error(e);
-    res
-      .status(e instanceof SyntaxError ? 400 : 500)
-      .json({ message: e instanceof Error ? e.message : "An error occurred" });
+  } catch (e: unknown) {
+    console.error(`Error updating pod:`, e);
+    if (e instanceof SyntaxError) {
+      res.status(400).json({ message: "Invalid JSON in request body" });
+    } else if (e instanceof Error) {
+      res.status(500).json({ message: `An error occurred: ${e.message}` });
+    } else {
+      res.status(500).json({ message: "An unexpected error occurred" });
+    }
   }
 });
 
 app.post("/api/pod", async (req, res) => {
   try {
     const { pod } = req.body as PODMintRequest;
-    if (!pod) throw new Error("Missing ID POD in request");
+    if (!pod) {
+      throw new Error("Missing ID POD in request");
+    }
 
     const deserialized = POD.deserialize(pod);
     console.log(deserialized);
@@ -105,10 +119,11 @@ app.post("/api/pod", async (req, res) => {
     console.log(content);
 
     const templatePOD = await redis.get(content["templateId"].value as string);
-    if (!templatePOD)
+    if (!templatePOD) {
       throw new Error(
         `POD template ${content["templateId"].value as string} doesn't exist`
       );
+    }
 
     const owner = content["pubkey"].value as bigint;
 
@@ -120,24 +135,25 @@ app.post("/api/pod", async (req, res) => {
     const newPOD = POD.sign(podEntries, SIGNER_KEY);
     const newPODID = newPOD.contentID.toString(16);
     const existingPOD = await redis.get(newPODID);
-    if (existingPOD) throw new Error(`Already minted POD with ID: ${newPODID}`);
+    if (existingPOD) {
+      throw new Error(`Already minted POD with ID: ${newPODID}`);
+    }
 
     const newPODData = {
-      // ...templatePOD,
       owner: owner.toString(),
-      // podEntries: JSON.stringify(podEntries),
       serializedPOD: newPOD.serialize(),
     };
     console.log(newPODData);
     await redis.set(newPODID, JSON.stringify(newPODData));
 
     res.status(200).json({ pod: newPOD.serialize() });
-    // res.status(200);
-  } catch (e) {
-    console.error(e);
-    res
-      .status(e instanceof SyntaxError ? 500 : 400)
-      .json({ message: e instanceof Error ? e.message : "An error occurred" });
+  } catch (error: unknown) {
+    console.error("Error in /api/pod:", error);
+    if (error instanceof Error) {
+      res.status(400).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: "An unexpected error occurred" });
+    }
   }
 });
 
@@ -161,9 +177,13 @@ app.get("/api/pods", async (req, res) => {
     } while (cursor !== "0");
 
     res.status(200).json({ pods });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ message: "An error occurred" });
+  } catch (e: unknown) {
+    console.error("Error fetching pods:", e);
+    if (e instanceof Error) {
+      res.status(500).json({ message: `An error occurred: ${e.message}` });
+    } else {
+      res.status(500).json({ message: "An unexpected error occurred" });
+    }
   }
 });
 
@@ -190,9 +210,13 @@ app.post("/api/newpod", async (req, res) => {
 
     console.log(`New pod created with CID: ${podCID}`);
     res.status(200).json({ message: "Successfully added pod" });
-  } catch (e) {
+  } catch (e: unknown) {
     console.error("Error creating new pod:", e);
-    res.status(500).json({ message: "An error occurred" });
+    if (e instanceof Error) {
+      res.status(400).json({ message: e.message });
+    } else {
+      res.status(500).json({ message: "An unexpected error occurred" });
+    }
   }
 });
 
