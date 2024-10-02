@@ -172,7 +172,19 @@ app.get("/api/pods", async (req, res) => {
 
       if (keys.length > 0) {
         const values = await redis.mget(...keys);
-        pods.push(...keys.map((key, index) => ({ key, value: values[index] })));
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          const value = values[i] as any;
+          if (value) {
+            try {
+              if (!value.owner) {
+                pods.push({ key, value });
+              }
+            } catch (parseError) {
+              console.error(`Error parsing JSON for key ${key}:`, parseError);
+            }
+          }
+        }
       }
     } while (cursor !== "0");
 

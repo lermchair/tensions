@@ -85,10 +85,10 @@ function App() {
 
   const sortedTensions = Array.from(tensions.entries()).sort((a, b) => {
     const timestampA = a[1].serializedPOD
-      ? JSON.parse(a[1].serializedPOD).timestamp?.value ?? 0
+      ? JSON.parse(a[1].serializedPOD).entries.timestamp?.value ?? 0
       : 0;
     const timestampB = b[1].serializedPOD
-      ? JSON.parse(b[1].serializedPOD).timestamp?.value ?? 0
+      ? JSON.parse(b[1].serializedPOD).entries.timestamp?.value ?? 0
       : 0;
     return Number(timestampB) - Number(timestampA);
   });
