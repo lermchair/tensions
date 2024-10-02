@@ -53,7 +53,7 @@ function App() {
     setCollectingMessage("Collecting tension...");
     try {
       setCollectingMessage("Getting Semaphore commitment...");
-      const pubkey = await z.identity.getSemaphoreV4Commitment();
+      const pubkey = await z.identity.getSemaphoreV3Commitment();
       console.log(pubkey);
       setCollectingMessage("Deserializing pod...");
       const deserializedPOD = POD.deserialize(tension.serializedPOD);
