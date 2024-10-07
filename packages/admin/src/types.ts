@@ -1,5 +1,6 @@
 export interface TensionPODData {
-  name: { type: "string"; value: string };
+  forceA: { type: "string"; value: string };
+  forceB: { type: "string"; value: string };
   zupass_title: { type: "string"; value: string };
   zupass_image_url: { type: "string"; value: string };
   zupass_description?: { type: "string"; value: string };
@@ -10,7 +11,8 @@ export interface TensionPODData {
 }
 
 export interface TensionData {
-  name: string;
+  forceA: string;
+  forceB: string;
   base64Image: string;
   imageFileName: string;
   source: string | undefined;

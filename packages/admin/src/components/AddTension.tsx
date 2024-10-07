@@ -9,7 +9,8 @@ export const AddTension: React.FC<{
 }> = ({ initialTension, onSubmit }) => {
   const [tension, setTension] = useState<TensionData>(
     initialTension || {
-      name: "",
+      forceA: "",
+      forceB: "",
       base64Image: "",
       source: "",
       imageFileName: "",
@@ -30,7 +31,7 @@ export const AddTension: React.FC<{
   );
 
   const isSubmitDisabled =
-    !tension.name.trim() || !tension.base64Image.trim() || isSubmitting;
+    !tension.forceA.trim() || !tension.forceB.trim() || !tension.base64Image.trim() || isSubmitting;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +46,8 @@ export const AddTension: React.FC<{
         setError(result);
       } else {
         setTension({
-          name: "",
+          forceA: "",
+          forceB: "",
           base64Image: "",
           source: "",
           imageFileName: "",
@@ -81,25 +83,46 @@ export const AddTension: React.FC<{
       >
         {!initialTension && "Add Tension"}
       </span>
-      <div className="flex flex-col items-center mb-6">
-        <div className="w-full mb-2">
+      <div className="flex flex-row items-center mb-6 gap-4">
+      <div className="flex flex-col">
           <label
             className="block text-gray-500 text-left"
             htmlFor="tension-name"
           >
-            Tension Name
+            Force A
           </label>
-        </div>
         <div className="w-full">
           <input
             className="appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
             id="tension-name"
             type="text"
-            placeholder="Essentialism vs. Nominalism"
-            value={tension.name}
-            onChange={(e) => setTensionField("name", e.target.value)}
+            placeholder="Essentialism"
+            value={tension.forceA}
+            onChange={(e) => setTensionField("forceA", e.target.value)}
           />
         </div>
+        </div>
+
+        <div className="flex flex-col">
+            <label
+              className="block text-gray-500 text-left"
+              htmlFor="tension-name"
+            >
+              Force B
+            </label>
+          <div className="w-full">
+            <input
+              className="appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+              id="tension-name"
+              type="text"
+              placeholder="Nominalism"
+              value={tension.forceB}
+              onChange={(e) => setTensionField("forceB", e.target.value)}
+            />
+          </div>
+          </div>
+
+
       </div>
 
       <div className="flex flex-col items-center mb-6">

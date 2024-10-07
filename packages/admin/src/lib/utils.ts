@@ -31,10 +31,11 @@ export async function addOrUpdateTension(
       {
         ...data,
         podEntries: JSON.stringify({
-          name: { type: "string", value: data.name },
+          forceA: { type: "string", value: data.forceA },
+          forceB: { type: "string", value: data.forceB },
           zupass_image_url: { type: "string", value: data.base64Image },
           source: { type: "string", value: data.source },
-          zupass_title: { type: "string", value: data.name },
+          zupass_title: { type: "string", value: `${data.forceA} vx. ${data.forceB}` },
           zupass_description: data.source
             ? { type: "string", value: data.source }
             : undefined,

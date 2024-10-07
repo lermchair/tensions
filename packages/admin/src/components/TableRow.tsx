@@ -19,7 +19,7 @@ export const TableRow: React.FC<{
         scope="row"
         className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
       >
-        {tension.name}
+        {tension.forceA} vs. {tension.forceB}
       </th>
       <td className="px-6 py-4">{tension.source || "None"}</td>
       <td className="px-6 py-4">

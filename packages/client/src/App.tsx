@@ -37,7 +37,7 @@ function App() {
       );
       console.log(response);
       if (response.data) {
-        const pod = response.data as TensionPOD;
+        const pod = JSON.parse(response.data) as TensionPOD;
         setTension(pod);
       }
     } catch (error) {
@@ -115,7 +115,7 @@ function App() {
         </div>
       ) : tension ? (
         <div className="flex flex-col items-center justify-center bg-white p-4 rounded-lg shadow-md">
-          <span className="my-2 text-3xl font-bold">{tension.name}</span>
+            <span className="my-2 text-3xl font-bold">{tension.forceA} vs. {tension.forceB}</span>
           <img
             src={tension.base64Image}
             className="max-w-md rounded-lg"
