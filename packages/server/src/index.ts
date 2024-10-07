@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { POD } from "@pcd/pod";
 import { SemaphoreSignaturePCDPackage } from "@pcd/semaphore-signature-pcd";
 import cors from "cors";
-import { PODMintRequest, TensionPOD, TensionPODRequest } from "./utils";
+import { getLargeData, PODMintRequest, setLargeData, TensionPOD, TensionPODRequest } from "./utils";
 import { Redis } from "@upstash/redis";
 import bodyParser from "body-parser";
 
@@ -29,6 +29,7 @@ const redis = new Redis({
   token: UPSTASH_REDIS_REST_TOKEN,
 });
 
+
 // Logging middleware
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
@@ -37,7 +38,7 @@ app.use((req, res, next) => {
 
 app.get("/api/pod/:id", async (req, res) => {
   try {
-    const pod = await redis.get(req.params.id);
+    const pod = await getLargeData(redis, req.params.id);
     if (!pod) {
       console.log(`Pod not found: ${req.params.id}`);
       return res.status(404).json({ message: "Pod not found" });
@@ -76,7 +77,7 @@ app.put("/api/pod/:id", async (req, res) => {
     if (!body?.podEntries)
       return res.status(400).json({ message: "Missing podEntries in request" });
 
-    const existingPod = await redis.get(id);
+    const existingPod = await getLargeData(redis, id);
     if (!existingPod)
       return res.status(404).json({ message: "Can't update nonexistent pod" });
 
@@ -88,7 +89,7 @@ app.put("/api/pod/:id", async (req, res) => {
       ...body,
       serializedPOD: pod.serialize(),
     } as TensionPOD;
-    await redis.set(id, JSON.stringify(updatedPod));
+    await setLargeData(redis, id, JSON.stringify(updatedPod));
     res.status(200).json({ message: "Successful update" });
   } catch (e: unknown) {
     console.error(`Error updating pod:`, e);
@@ -118,7 +119,7 @@ app.post("/api/pod", async (req, res) => {
     const content = deserialized.content.asEntries();
     console.log(content);
 
-    const templatePOD = await redis.get(content["templateId"].value as string);
+    const templatePOD = await getLargeData(redis, content["templateId"].value as string);
     if (!templatePOD) {
       throw new Error(
         `POD template ${content["templateId"].value as string} doesn't exist`
@@ -128,13 +129,13 @@ app.post("/api/pod", async (req, res) => {
     const owner = content["pubkey"].value as bigint;
 
     const podEntries = JSON.parse(
-      (templatePOD as TensionPODRequest).podEntries
+      (JSON.parse(templatePOD) as TensionPODRequest).podEntries
     );
     podEntries.owner = { type: "cryptographic", value: BigInt(owner) };
 
     const newPOD = POD.sign(podEntries, SIGNER_KEY);
     const newPODID = newPOD.contentID.toString(16);
-    const existingPOD = await redis.get(newPODID);
+    const existingPOD = await getLargeData(redis, newPODID);
     if (existingPOD) {
       throw new Error(`Already minted POD with ID: ${newPODID}`);
     }
@@ -144,7 +145,7 @@ app.post("/api/pod", async (req, res) => {
       serializedPOD: newPOD.serialize(),
     };
     console.log(newPODData);
-    await redis.set(newPODID, JSON.stringify(newPODData));
+    await setLargeData(redis, newPODID, JSON.stringify(newPODData));
 
     res.status(200).json({ pod: newPOD.serialize() });
   } catch (error: unknown) {
@@ -171,14 +172,13 @@ app.get("/api/pods", async (req, res) => {
       cursor = nextCursor;
 
       if (keys.length > 0) {
-        const values = await redis.mget(...keys);
-        for (let i = 0; i < keys.length; i++) {
-          const key = keys[i];
-          const value = values[i] as any;
+        for (const key of keys) {
+          const value = await getLargeData(redis, key);
           if (value) {
             try {
-              if (!value.owner) {
-                pods.push({ key, value });
+              const parsedValue = JSON.parse(value);
+              if (!parsedValue.owner) {
+                pods.push({ key, value: parsedValue });
               }
             } catch (parseError) {
               console.error(`Error parsing JSON for key ${key}:`, parseError);
@@ -218,7 +218,8 @@ app.post("/api/newpod", async (req, res) => {
       ...body,
       serializedPOD: pod.serialize(),
     } as TensionPOD;
-    await redis.set(podCID, JSON.stringify(newPODData));
+    // await redis.set(podCID, JSON.stringify(newPODData));
+    await setLargeData(redis, podCID, JSON.stringify(newPODData));
 
     console.log(`New pod created with CID: ${podCID}`);
     res.status(200).json({ message: "Successfully added pod" });
