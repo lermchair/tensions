@@ -121,8 +121,13 @@ function App() {
             className="max-w-md rounded-lg"
             alt="Tension"
           />
-          {tension.source && (
-            <span className="mt-2 text-gray-600">{tension.source}</span>
+          {tension.author && (
+            <div className="flex flex-col gap-2 items-center mt-2">
+            <span className="mt-2 text-gray-600">By {tension.author}</span>
+            <a href={tension.ideaSource} target="_blank" rel="noreferrer">
+              <span className="mt-2 underline text-blue-500 font-medium">View Idea Source</span>
+            </a>
+            </div>
           )}
           <button
             className={`mt-4 rounded ${

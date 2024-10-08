@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TensionData } from "@tensions/common";
+import { isValidUrl } from "@/lib/utils";
 
 export const AddTension: React.FC<{
   initialTension: TensionData | undefined;
@@ -12,7 +13,8 @@ export const AddTension: React.FC<{
       forceA: "",
       forceB: "",
       base64Image: "",
-      source: "",
+      author: "",
+      ideaSource: "",
       imageFileName: "",
     }
   );
@@ -31,13 +33,23 @@ export const AddTension: React.FC<{
   );
 
   const isSubmitDisabled =
-    !tension.forceA.trim() || !tension.forceB.trim() || !tension.base64Image.trim() || isSubmitting;
+      !tension.forceA.trim() ||
+      !tension.forceB.trim() ||
+      !tension.base64Image.trim() ||
+      (tension.ideaSource && !isValidUrl(tension.ideaSource)) ||
+      !tension.author||
+      !tension.ideaSource ||
+      isSubmitting;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitDisabled) {
-      setError("Tension name and image are required");
-      return;
+      if (tension.ideaSource && !isValidUrl(tension.ideaSource)) {
+         setError("Please enter a valid URL for the idea source");
+       } else {
+         setError("Tension name and image are required");
+       }
+       return;
     }
     setIsSubmitting(true);
     try {
@@ -49,7 +61,8 @@ export const AddTension: React.FC<{
           forceA: "",
           forceB: "",
           base64Image: "",
-          source: "",
+          author: "",
+          ideaSource: "",
           imageFileName: "",
         });
         setError(undefined);
@@ -129,19 +142,44 @@ export const AddTension: React.FC<{
         <div className="w-full mb-2">
           <label
             className="block text-gray-500 text-left"
-            htmlFor="tension-source"
+            htmlFor="tension-author"
           >
-            Source (optional)
+            Card Author
           </label>
         </div>
         <div className="w-full">
           <input
             className="appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+            id="tension-author"
+            type="text"
+            placeholder="A name"
+            value={tension.author}
+            onChange={(e) => setTensionField("author", e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center mb-6">
+        <div className="w-full mb-2">
+          <label
+            className="block text-gray-500 text-left"
+            htmlFor="tension-source"
+          >
+            Idea Source URL
+          </label>
+        </div>
+        <div className="w-full">
+          <input
+            className={`appearance-none border-2 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500 ${
+               tension.ideaSource && !isValidUrl(tension.ideaSource)
+                 ? "border-red-500"
+                 : "border-gray-200"
+             }`}
             id="tension-source"
             type="text"
-            placeholder="Tension source"
-            value={tension.source}
-            onChange={(e) => setTensionField("source", e.target.value)}
+            placeholder="https://example.com/ideas/example-i-and-example-ii"
+            value={tension.ideaSource}
+            onChange={(e) => setTensionField("ideaSource", e.target.value)}
           />
         </div>
       </div>

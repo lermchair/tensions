@@ -30,9 +30,10 @@ export async function addOrUpdateTension(
       forceA: { type: "string", value: data.forceA },
       forceB: { type: "string", value: data.forceB },
       zupass_image_url: { type: "string", value: data.base64Image },
-      source:{ type: "string", value: data.source ?? "" },
-      zupass_title: { type: "string", value: `${data.forceA} vx. ${data.forceB}` },
-      zupass_description: { type: "string", value: data.source ?? "" },
+      author:{ type: "string", value: data.author},
+      idea_source:{ type: "string", value: data.ideaSource},
+      zupass_title: { type: "string", value: `${data.forceA} vs. ${data.forceB}` },
+      zupass_description: { type: "string", value: data.author},
       zupass_display: { type: "string", value: "collectable" },
       owner: undefined,
       timestamp: undefined,
@@ -93,4 +94,9 @@ export const truncateFileName = (fileName: string, maxLength: number = 12) => {
     "..." +
     nameWithoutExtension.slice(-1);
   return `${truncated}.${extension}`;
+};
+
+export const isValidUrl = (url: string) => {
+  const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+  return urlPattern.test(url);
 };

@@ -110,7 +110,7 @@ function App() {
                   Tension
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Source
+                  Author
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Image

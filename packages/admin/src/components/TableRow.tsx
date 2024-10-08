@@ -21,7 +21,7 @@ export const TableRow: React.FC<{
       >
         {tension.forceA} vs. {tension.forceB}
       </th>
-      <td className="px-6 py-4">{tension.source || "None"}</td>
+      <td className="px-6 py-4">{tension.author || "None"}</td>
       <td className="px-6 py-4">
         {tension.base64Image
           ? truncateFileName(tension.imageFileName)

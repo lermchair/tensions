@@ -15,7 +15,11 @@ interface TensionPODData {
         type: "string";
         value: string;
     };
-    source: {
+    author: {
+        type: "string";
+        value: string;
+    };
+    idea_source: {
         type: "string";
         value: string;
     };
@@ -41,7 +45,8 @@ interface TensionData {
     forceB: string;
     base64Image: string;
     imageFileName: string;
-    source: string | undefined;
+    author: string;
+    ideaSource: string;
 }
 interface TensionPODRequest extends TensionData {
     podFolder: string;

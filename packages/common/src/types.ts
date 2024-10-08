@@ -3,7 +3,8 @@ export interface TensionPODData {
   forceB: { type: "string"; value: string };
   zupass_title: { type: "string"; value: string };
   zupass_image_url: { type: "string"; value: string };
-  source: { type: "string"; value: string };
+  author: { type: "string"; value: string };
+  idea_source: { type: "string"; value: string };
   zupass_display: { type: "string"; value: "collectable" };
   zupass_description: { type: "string"; value: string };
   owner: { type: "cryptographic"; value: bigint } | undefined;
@@ -15,7 +16,8 @@ export interface TensionData {
   forceB: string;
   base64Image: string;
   imageFileName: string;
-  source: string | undefined;
+  author: string;
+  ideaSource: string;
 }
 
 export interface TensionPODRequest extends TensionData {
