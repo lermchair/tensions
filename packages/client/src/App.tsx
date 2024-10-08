@@ -129,6 +129,17 @@ function App() {
             </a>
             </div>
           )}
+
+
+    {/* <span className="mt-4 mb-2">Editorial Opinion Tradeoff</span>
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div className="bg-blue-600 h-2.5 rounded-full" style={{width: `${(tension.tradeoff * 100) / 5}%`}}></div>
+          </div>
+          <div className="flex w-full justify-between mt-1">
+              <span className="text-base font-medium text-gray-700">{tension.forceA}</span>
+              <span className="text-base font-medium text-gray-700">{tension.forceB}</span>
+          </div> */}
+
           <button
             className={`mt-4 rounded ${
               collected

@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TensionData } from "@tensions/common";
 import { isValidUrl } from "@/lib/utils";
+import { Slider } from "@/components/ui/slider";
 
 export const AddTension: React.FC<{
   initialTension: TensionData | undefined;
@@ -14,6 +15,7 @@ export const AddTension: React.FC<{
       forceB: "",
       base64Image: "",
       author: "",
+      tradeoff: 3,
       ideaSource: "",
       imageFileName: "",
     }
@@ -22,7 +24,7 @@ export const AddTension: React.FC<{
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const setTensionField = useCallback(
-    (field: keyof TensionData, value: string) => {
+    (field: keyof TensionData, value: string | number) => {
       setTension((prevTension) => ({
         ...prevTension,
         [field]: value,
@@ -62,6 +64,7 @@ export const AddTension: React.FC<{
           forceB: "",
           base64Image: "",
           author: "",
+          tradeoff: 3,
           ideaSource: "",
           imageFileName: "",
         });
@@ -114,7 +117,7 @@ export const AddTension: React.FC<{
             onChange={(e) => setTensionField("forceA", e.target.value)}
           />
         </div>
-        </div>
+      </div>
 
         <div className="flex flex-col">
             <label
@@ -134,8 +137,6 @@ export const AddTension: React.FC<{
             />
           </div>
           </div>
-
-
       </div>
 
       <div className="flex flex-col items-center mb-6">
@@ -181,6 +182,25 @@ export const AddTension: React.FC<{
             value={tension.ideaSource}
             onChange={(e) => setTensionField("ideaSource", e.target.value)}
           />
+        </div>
+      </div>
+
+      <div className="flex flex-col mb-6 gap-4">
+        <label className="block text-gray-500 text-left" htmlFor="tension-tradeoff">
+          Editorial Opinion Tradeoff
+        </label>
+        <Slider id="tension-tradeoff" defaultValue={[3]} max={5} step={1}  onValueChange={(value) => setTensionField("tradeoff", value[0])} />
+        <div className="w-full h-full flex items-center justify-between">
+        {tension.forceA ? (
+          <span className="text-gray-500">{tension.forceA}</span>
+        ) : (
+          <span className="text-gray-500">Left</span>
+        )}
+        {tension.forceB ? (
+          <span className="text-gray-500">{tension.forceB}</span>
+        ) : (
+          <span className="text-gray-500">Right</span>
+        )}
         </div>
       </div>
 

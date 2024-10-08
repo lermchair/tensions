@@ -211,6 +211,11 @@ app.post("/api/newpod", async (req, res) => {
     const podEntries = JSON.parse(body.podEntries);
     delete podEntries.owner;
 
+    console.log(podEntries.tradeoff);
+    if (typeof podEntries.tradeoff.value === "number") {
+      podEntries.tradeoff = { type: "int", value: BigInt(podEntries.tradeoff.value) };
+    }
+
     podEntries.timestamp = { type: "int", value: BigInt(Date.now()) };
     const pod = POD.sign(podEntries, SIGNER_KEY);
 
@@ -219,7 +224,6 @@ app.post("/api/newpod", async (req, res) => {
       ...body,
       serializedPOD: pod.serialize(),
     } as TensionPOD;
-    // await redis.set(podCID, JSON.stringify(newPODData));
     await setLargeData(redis, podCID, JSON.stringify(newPODData));
 
     console.log(`New pod created with CID: ${podCID}`);

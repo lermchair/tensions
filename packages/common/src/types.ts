@@ -5,6 +5,7 @@ export interface TensionPODData {
   zupass_image_url: { type: "string"; value: string };
   author: { type: "string"; value: string };
   idea_source: { type: "string"; value: string };
+  tradeoff: { type: "int"; value: Number };
   zupass_display: { type: "string"; value: "collectable" };
   zupass_description: { type: "string"; value: string };
   owner: { type: "cryptographic"; value: bigint } | undefined;
@@ -17,6 +18,7 @@ export interface TensionData {
   base64Image: string;
   imageFileName: string;
   author: string;
+  tradeoff: Number;
   ideaSource: string;
 }
 

@@ -32,6 +32,7 @@ export async function addOrUpdateTension(
       zupass_image_url: { type: "string", value: data.base64Image },
       author:{ type: "string", value: data.author},
       idea_source:{ type: "string", value: data.ideaSource},
+      tradeoff: { type: "int", value: data.tradeoff},
       zupass_title: { type: "string", value: `${data.forceA} vs. ${data.forceB}` },
       zupass_description: { type: "string", value: data.author},
       zupass_display: { type: "string", value: "collectable" },
