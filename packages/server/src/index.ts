@@ -3,7 +3,11 @@ import dotenv from "dotenv";
 import { POD } from "@pcd/pod";
 import { SemaphoreSignaturePCDPackage } from "@pcd/semaphore-signature-pcd";
 import cors from "cors";
-import { PODMintRequest, TensionPOD, TensionPODRequest } from "@tensions/common";
+import {
+  PODMintRequest,
+  TensionPOD,
+  TensionPODRequest,
+} from "@tensions/common";
 import { getLargeData, setLargeData } from "./utils";
 import { Redis } from "@upstash/redis";
 import bodyParser from "body-parser";
@@ -29,7 +33,6 @@ const redis = new Redis({
   url: UPSTASH_REDIS_REST_URL,
   token: UPSTASH_REDIS_REST_TOKEN,
 });
-
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -120,7 +123,10 @@ app.post("/api/pod", async (req, res) => {
     const content = deserialized.content.asEntries();
     console.log(content);
 
-    const templatePOD = await getLargeData(redis, content["templateId"].value as string);
+    const templatePOD = await getLargeData(
+      redis,
+      content["templateId"].value as string
+    );
     if (!templatePOD) {
       throw new Error(
         `POD template ${content["templateId"].value as string} doesn't exist`
@@ -133,6 +139,10 @@ app.post("/api/pod", async (req, res) => {
       (JSON.parse(templatePOD) as TensionPODRequest).podEntries
     );
     podEntries.owner = { type: "cryptographic", value: BigInt(owner) };
+    podEntries.tradeoff = {
+      type: "string",
+      value: String(podEntries.tradeoff),
+    };
 
     const newPOD = POD.sign(podEntries, SIGNER_KEY);
     const newPODID = newPOD.contentID.toString(16);
@@ -213,7 +223,10 @@ app.post("/api/newpod", async (req, res) => {
 
     console.log(podEntries.tradeoff);
     if (typeof podEntries.tradeoff.value === "number") {
-      podEntries.tradeoff = { type: "int", value: BigInt(podEntries.tradeoff.value) };
+      podEntries.tradeoff = {
+        type: "int",
+        value: BigInt(podEntries.tradeoff.value),
+      };
     }
 
     podEntries.timestamp = { type: "int", value: BigInt(Date.now()) };
