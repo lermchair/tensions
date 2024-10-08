@@ -5,8 +5,9 @@ export interface TensionPODData {
   zupass_image_url: { type: "string"; value: string };
   source: { type: "string"; value: string };
   zupass_display: { type: "string"; value: "collectable" };
-  owner: { type: "cryptographic"; value: bigint };
-  timestamp: { type: "int"; value: bigint };
+  zupass_description: { type: "string"; value: string };
+  owner: { type: "cryptographic"; value: bigint } | undefined;
+  timestamp: { type: "int"; value: bigint } | undefined;
 }
 
 export interface TensionData {

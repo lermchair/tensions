@@ -23,14 +23,18 @@ interface TensionPODData {
         type: "string";
         value: "collectable";
     };
+    zupass_description: {
+        type: "string";
+        value: string;
+    };
     owner: {
         type: "cryptographic";
         value: bigint;
-    };
+    } | undefined;
     timestamp: {
         type: "int";
         value: bigint;
-    };
+    } | undefined;
 }
 interface TensionData {
     forceA: string;

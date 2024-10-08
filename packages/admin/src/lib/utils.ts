@@ -32,10 +32,10 @@ export async function addOrUpdateTension(
       zupass_image_url: { type: "string", value: data.base64Image },
       source:{ type: "string", value: data.source ?? "" },
       zupass_title: { type: "string", value: `${data.forceA} vx. ${data.forceB}` },
-      zupass_description: data.source
-        ? { type: "string", value: data.source }
-        : undefined,
+      zupass_description: { type: "string", value: data.source ?? "" },
       zupass_display: { type: "string", value: "collectable" },
+      owner: undefined,
+      timestamp: undefined,
     };
     const response = await axios[method](
       url,
