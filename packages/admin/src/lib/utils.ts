@@ -34,6 +34,7 @@ export async function addOrUpdateTension(
       idea_source:{ type: "string", value: data.ideaSource},
       tradeoff: { type: "int", value: data.tradeoff},
       details: { type: "string", value: data.details},
+      lighthouse: { type: "string", value: data.lighthouse.toLowerCase()},
       zupass_title: { type: "string", value: `${data.forceA} vs. ${data.forceB}` },
       zupass_description: { type: "string", value: data.details},
       zupass_display: { type: "string", value: "collectable" },

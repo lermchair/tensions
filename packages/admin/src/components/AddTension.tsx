@@ -5,6 +5,14 @@ import { TensionData } from "@tensions/common";
 import { isValidUrl } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
 
 
 export const AddTension: React.FC<{
@@ -20,6 +28,7 @@ export const AddTension: React.FC<{
       tradeoff: 3,
       ideaSource: "",
       imageFileName: "",
+      lighthouse: "d/acc",
       details: "",
     }
   );
@@ -70,6 +79,7 @@ export const AddTension: React.FC<{
           tradeoff: 3,
           ideaSource: "",
           imageFileName: "",
+          lighthouse: "d/acc",
           details: "",
         });
         setError(undefined);
@@ -208,8 +218,28 @@ export const AddTension: React.FC<{
         </div>
       </div>
 
+      <div className="mb-4">
       <Label
-        className="text-gray-500 text-md font-normal flex-start flex mb- mb-22"
+        className="text-gray-500 text-md font-normal flex-start flex mb-2"
+        htmlFor="details"
+      >
+        Lighthouse
+      </Label>
+      <Select onValueChange={(value) => setTensionField("lighthouse", value)} defaultValue={"hardened commons"}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Select Lighthouse" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="hardened commons">Hardened commons</SelectItem>
+          <SelectItem value="protocol literacy">Protocol literacy</SelectItem>
+          <SelectItem value="d/acc">d/acc</SelectItem>
+          <SelectItem value="punk spirit">Punk spirit</SelectItem>
+        </SelectContent>
+      </Select>
+      </div>
+
+      <Label
+        className="text-gray-500 text-md font-normal flex-start flex mb-2"
         htmlFor="details"
       >
         Details

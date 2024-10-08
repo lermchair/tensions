@@ -7,6 +7,7 @@ export interface TensionPODData {
   idea_source: { type: "string"; value: string };
   tradeoff: { type: "int"; value: Number };
   details: {type: "string"; value: string};
+  lighthouse: { type: "string"; value: string };
   zupass_display: { type: "string"; value: "collectable" };
   zupass_description: { type: "string"; value: string };
   owner: { type: "cryptographic"; value: bigint } | undefined;
@@ -21,6 +22,7 @@ export interface TensionData {
   author: string;
   tradeoff: Number;
   details: string;
+  lighthouse: string;
   ideaSource: string;
 }
 

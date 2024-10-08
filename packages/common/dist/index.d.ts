@@ -31,6 +31,10 @@ interface TensionPODData {
         type: "string";
         value: string;
     };
+    lighthouse: {
+        type: "string";
+        value: string;
+    };
     zupass_display: {
         type: "string";
         value: "collectable";
@@ -56,6 +60,7 @@ interface TensionData {
     author: string;
     tradeoff: Number;
     details: string;
+    lighthouse: string;
     ideaSource: string;
 }
 interface TensionPODRequest extends TensionData {
