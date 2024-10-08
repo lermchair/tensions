@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import useQueryParams from "./lib/UseQueryParams";
 import { useParcnetClient } from "./lib/UseParcnetClient";
 import axios from "axios";
-import { TensionPOD } from "./utils";
+import { TensionPOD } from "@tensions/common";
 import { POD, PODEntries } from "@pcd/pod";
 
 function App() {

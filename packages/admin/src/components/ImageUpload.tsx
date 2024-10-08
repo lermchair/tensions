@@ -1,4 +1,4 @@
-import { TensionData } from "@/types";
+import { TensionData } from "@tensions/common";
 import React, { useState, ChangeEvent, useEffect } from "react";
 
 export const ImageUpload: React.FC<{

@@ -3,7 +3,8 @@ import dotenv from "dotenv";
 import { POD } from "@pcd/pod";
 import { SemaphoreSignaturePCDPackage } from "@pcd/semaphore-signature-pcd";
 import cors from "cors";
-import { getLargeData, PODMintRequest, setLargeData, TensionPOD, TensionPODRequest } from "./utils";
+import { PODMintRequest, TensionPOD, TensionPODRequest } from "@tensions/common";
+import { getLargeData, setLargeData } from "./utils";
 import { Redis } from "@upstash/redis";
 import bodyParser from "body-parser";
 

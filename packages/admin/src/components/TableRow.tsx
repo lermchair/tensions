@@ -1,5 +1,5 @@
 import { truncateFileName } from "@/lib/utils";
-import { TensionPOD } from "@/types";
+import { TensionPOD } from "@tensions/common";
 import React, { useState } from "react";
 
 const CLIENT_URL = import.meta.env.PROD

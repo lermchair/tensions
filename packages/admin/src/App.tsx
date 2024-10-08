@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { TensionData, TensionPOD } from "./types";
+import { TensionData, TensionPOD } from "@tensions/common";
 import { addOrUpdateTension, handleDeleteTension } from "./lib/utils";
 
 const SERVER_URL = import.meta.env.PROD

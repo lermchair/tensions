@@ -3,7 +3,7 @@ import {
   TensionPOD,
   TensionPODData,
   TensionPODRequest,
-} from "@/types";
+} from "@tensions/common";
 import axios from "axios";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -26,21 +26,22 @@ export async function addOrUpdateTension(
     const method = id ? "put" : "post";
     console.log("URL:", url);
     console.log("METHOD:", method);
+    const obj: TensionPODData = {
+      forceA: { type: "string", value: data.forceA },
+      forceB: { type: "string", value: data.forceB },
+      zupass_image_url: { type: "string", value: data.base64Image },
+      source:{ type: "string", value: data.source ?? "" },
+      zupass_title: { type: "string", value: `${data.forceA} vx. ${data.forceB}` },
+      zupass_description: data.source
+        ? { type: "string", value: data.source }
+        : undefined,
+      zupass_display: { type: "string", value: "collectable" },
+    };
     const response = await axios[method](
       url,
       {
         ...data,
-        podEntries: JSON.stringify({
-          forceA: { type: "string", value: data.forceA },
-          forceB: { type: "string", value: data.forceB },
-          zupass_image_url: { type: "string", value: data.base64Image },
-          source: { type: "string", value: data.source },
-          zupass_title: { type: "string", value: `${data.forceA} vx. ${data.forceB}` },
-          zupass_description: data.source
-            ? { type: "string", value: data.source }
-            : undefined,
-          zupass_display: { type: "string", value: "collectable" },
-        } as TensionPODData),
+        podEntries: JSON.stringify(obj),
         podFolder: "Tensions",
       } as TensionPODRequest,
       {

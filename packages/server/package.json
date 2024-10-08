@@ -21,6 +21,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@tensions/common": "workspace:*",
     "@pcd/passport-interface": "^0.11.2",
     "@pcd/pcd-types": "^0.11.1",
     "@pcd/pod": "^0.1.7",

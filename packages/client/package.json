@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tensions/common": "workspace:*",
     "@parcnet-js/app-connector": "^0.0.6",
     "@parcnet-js/podspec": "^0.0.3",
     "@pcd/pod": "^0.1.7",
