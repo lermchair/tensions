@@ -167,7 +167,7 @@ function App() {
         </div>
         {selectedTension && (
           <Dialog open={isModalOpen} onOpenChange={() => setIsModalOpen(false)}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px] overflow-y-scroll max-h-screen">
               <DialogHeader>
                 <DialogTitle>Edit Tension</DialogTitle>
               </DialogHeader>
