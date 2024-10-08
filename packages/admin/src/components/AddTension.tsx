@@ -4,6 +4,8 @@ import { Label } from "@/components/ui/label";
 import { TensionData } from "@tensions/common";
 import { isValidUrl } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea"
+
 
 export const AddTension: React.FC<{
   initialTension: TensionData | undefined;
@@ -18,6 +20,7 @@ export const AddTension: React.FC<{
       tradeoff: 3,
       ideaSource: "",
       imageFileName: "",
+      details: "",
     }
   );
   const [error, setError] = useState<string | undefined>(undefined);
@@ -67,6 +70,7 @@ export const AddTension: React.FC<{
           tradeoff: 3,
           ideaSource: "",
           imageFileName: "",
+          details: "",
         });
         setError(undefined);
       }
@@ -203,6 +207,14 @@ export const AddTension: React.FC<{
         )}
         </div>
       </div>
+
+      <Label
+        className="text-gray-500 text-md font-normal flex-start flex mb- mb-22"
+        htmlFor="details"
+      >
+        Details
+      </Label>
+      <Textarea id="details" className="mb-4" value={tension.details} onChange={(e) => setTensionField("details", e.target.value)} />
 
       <div className="grid w-full max-w-sm items-center gap-1.5">
         <Label

@@ -27,6 +27,10 @@ interface TensionPODData {
         type: "int";
         value: Number;
     };
+    details: {
+        type: "string";
+        value: string;
+    };
     zupass_display: {
         type: "string";
         value: "collectable";
@@ -51,6 +55,7 @@ interface TensionData {
     imageFileName: string;
     author: string;
     tradeoff: Number;
+    details: string;
     ideaSource: string;
 }
 interface TensionPODRequest extends TensionData {

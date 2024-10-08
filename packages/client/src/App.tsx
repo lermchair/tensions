@@ -121,6 +121,9 @@ function App() {
             className="max-w-md rounded-lg"
             alt="Tension"
           />
+          <div className="mt-4 mb-2 max-w-sm text-center">
+            <span className="text-gray-600 text-sm">{tension.details}</span>
+            </div>
           {tension.author && (
             <div className="flex flex-col gap-2 items-center mt-2">
             <span className="mt-2 text-gray-600">By {tension.author}</span>
