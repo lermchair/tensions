@@ -168,7 +168,7 @@ function App() {
             </p>
           )}
           {collected && (
-            <a href="https://develop.zupass.org/#/?folder=PODs%2520from%2520Zapps">
+            <a href="https://zupass.org/#/?folder=PODs%2520from%2520Zapps">
               <div
                 className={`mt-4 rounded ${"bg-emerald-600 hover:bg-emerald-700"} text-white font-bold px-4 py-2 flex items-center justify-center transition-colors`}
               >
